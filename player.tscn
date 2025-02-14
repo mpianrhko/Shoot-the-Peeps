@@ -1,0 +1,67 @@
+[gd_scene load_steps=8 format=3 uid="uid://pw6l54b6ak1h"]
+
+[ext_resource type="Script" path="res://player.gd" id="1_sbmt0"]
+[ext_resource type="Texture2D" uid="uid://br6dlfyfwqfw4" path="res://art/PlayerUp2.png" id="2_3dal5"]
+[ext_resource type="Texture2D" uid="uid://7w5464vdk3pj" path="res://art/PlayerWalk2.png" id="3_38dgi"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_y2dgo"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_3dal5")
+}],
+"loop": true,
+"name": &"up",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_38dgi")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_tcemo"]
+radius = 32.0
+height = 64.0
+
+[sub_resource type="GDScript" id="GDScript_hsxyn"]
+script/source = "# collision_detector.gd
+extends Area2D
+
+signal collision_detected(body: Node)
+
+func _ready() -> void:
+	monitoring = true
+	connect(\"body_entered\", Callable(self, \"_on_body_entered\"))
+
+func _on_body_entered(body: Node) -> void:
+	# Emit our custom signal to let the player know a collision occurred.
+	emit_signal(\"collision_detected\", body)
+"
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_kbgj5"]
+radius = 33.0
+height = 68.0
+
+[node name="Player" type="CharacterBody2D"]
+script = ExtResource("1_sbmt0")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(1, 0)
+scale = Vector2(0.5, 0.5)
+sprite_frames = SubResource("SpriteFrames_y2dgo")
+animation = &"walk"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(2, -4)
+shape = SubResource("CapsuleShape2D_tcemo")
+
+[node name="CollisionDetector" type="Area2D" parent="."]
+script = SubResource("GDScript_hsxyn")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CollisionDetector"]
+position = Vector2(2, -4)
+shape = SubResource("CapsuleShape2D_kbgj5")
